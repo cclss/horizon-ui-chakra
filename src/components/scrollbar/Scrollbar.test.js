@@ -36,7 +36,7 @@ function rulesFor(element) {
     .filter((css) => classNames.some((name) => css.includes(`.${name}`)));
 }
 
-function renderScrollArea(colorMode) {
+function renderScrollArea(colorMode, props = {}) {
   render(
     <ThemeProvider theme={theme}>
       <ColorModeContext.Provider
@@ -45,7 +45,7 @@ function renderScrollArea(colorMode) {
           setColorMode: () => {},
           toggleColorMode: () => {},
         }}>
-        <Scrollbar>
+        <Scrollbar {...props}>
           <div data-testid='overflowing-content' />
         </Scrollbar>
       </ColorModeContext.Provider>
@@ -112,5 +112,50 @@ describe.each([
           css.includes("overflow-x: hidden")
       )
     ).toBe(true);
+  });
+});
+
+describe("Scroll area layout contract", () => {
+  /** Every declaration the scroll area emits, flattened across its rules. */
+  const declarationsOf = (rules) => rules.join(" ");
+
+  it("keeps the scroll contract when a caller passes conflicting layout props", () => {
+    const rules = renderScrollArea("light", {
+      h: "40px",
+      w: "50%",
+      overflowY: "hidden",
+      overflowX: "scroll",
+    });
+    const css = declarationsOf(rules);
+
+    expect(css).toContain("overflow-y: auto");
+    expect(css).toContain("overflow-x: hidden");
+    expect(css).toContain("height: 100%");
+    expect(css).toContain("width: 100%");
+    expect(css).not.toContain("overflow-y: hidden");
+    expect(css).not.toContain("overflow-x: scroll");
+    expect(css).not.toContain("height: 40px");
+    expect(css).not.toContain("width: 50%");
+  });
+
+  it("still applies the drawer's flex sizing overrides", () => {
+    const css = declarationsOf(
+      renderScrollArea("light", { flex: "1", minH: "0" })
+    );
+
+    expect(css).toContain("flex: 1");
+    expect(css).toContain("min-height: 0");
+    expect(css).toContain("height: 100%");
+    expect(css).toContain("overflow-y: auto");
+  });
+
+  it("does not let a caller replace the scrollbar chrome through sx", () => {
+    const css = declarationsOf(
+      renderScrollArea("light", { sx: { overflowY: "hidden" } })
+    );
+
+    expect(css).toContain("overflow-y: auto");
+    expect(css).not.toContain("overflow-y: hidden");
+    expect(css).toContain("::-webkit-scrollbar-thumb");
   });
 });

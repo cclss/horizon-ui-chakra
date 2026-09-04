@@ -46,7 +46,16 @@ export function Scrollbar({ children, ...rest }) {
   );
 
   return (
+    /*
+     * `{...rest}` is spread first on purpose: the props below define the
+     * scroll contract (a full-size, vertically scrolling, horizontally
+     * clipped viewport plus the scrollbar chrome) and must outrank whatever a
+     * caller passes, so no call site can silently turn scrolling off. Props
+     * that do not collide — the drawer's `flex` / `minH`, for example — are
+     * untouched and still apply.
+     */
     <Box
+      {...rest}
       h='100%'
       w='100%'
       overflowY='auto'
@@ -85,8 +94,7 @@ export function Scrollbar({ children, ...rest }) {
             background: thumbColor,
           },
         },
-      }}
-      {...rest}>
+      }}>
       {children}
     </Box>
   );
