@@ -14,12 +14,7 @@ import {
   DrawerCloseButton,
 } from "@chakra-ui/react";
 import Content from "components/sidebar/components/Content";
-import {
-  renderThumb,
-  renderTrack,
-  renderView,
-} from "components/scrollbar/Scrollbar";
-import { Scrollbars } from "react-custom-scrollbars-2";
+import { Scrollbar } from "components/scrollbar/Scrollbar";
 import PropTypes from "prop-types";
 
 // Assets
@@ -49,13 +44,9 @@ function Sidebar(props) {
         minH='100%'
         overflowX='hidden'
         boxShadow={shadow}>
-        <Scrollbars
-          autoHide
-          renderTrackVertical={renderTrack}
-          renderThumbVertical={renderThumb}
-          renderView={renderView}>
+        <Scrollbar>
           <Content routes={routes} />
-        </Scrollbars>
+        </Scrollbar>
       </Box>
     </Box>
   );
@@ -99,14 +90,17 @@ export function SidebarResponsive(props) {
             _focus={{ boxShadow: "none" }}
             _hover={{ boxShadow: "none" }}
           />
-          <DrawerBody maxW='285px' px='0rem' pb='0'>
-            <Scrollbars
-              autoHide
-              renderTrackVertical={renderTrack}
-              renderThumbVertical={renderThumb}
-              renderView={renderView}>
+          <DrawerBody
+            maxW='285px'
+            px='0rem'
+            pb='0'
+            display='flex'
+            flexDirection='column'>
+            {/* flex/minH keep the scroll area bound to the drawer height, so the
+                drawer body itself never grows a second scrollbar. */}
+            <Scrollbar flex='1' minH='0'>
               <Content routes={routes} />
-            </Scrollbars>
+            </Scrollbar>
           </DrawerBody>
         </DrawerContent>
       </Drawer>
